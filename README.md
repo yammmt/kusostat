@@ -1,5 +1,7 @@
 # kusostat
 
+![Rust](https://github.com/yammmt/kusostat/workflows/Rust/badge.svg)
+
 Stores your excreation and urine info
 
 ## Develop
