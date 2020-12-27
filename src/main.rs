@@ -1,3 +1,4 @@
+use actix_files as fs;
 use actix_web::{error, get, web, App, Error, HttpResponse, HttpServer, Result};
 use tera::Tera;
 
@@ -15,7 +16,10 @@ async fn main() -> std::io::Result<()> {
         // No `unwrap()` error because there is the `static/` directory
         let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/static/templates/*")).unwrap();
 
-        App::new().data(tera).service(index)
+        App::new().data(tera).service(index).service(
+            fs::Files::new("/css", concat!(env!("CARGO_MANIFEST_DIR"), "/static/css"))
+                .show_files_listing(),
+        )
     })
     .bind("127.0.0.1:8080")?
     .run()
