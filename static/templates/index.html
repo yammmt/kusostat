@@ -8,4 +8,30 @@
 <section class="section">
     Hello Work
 </section>
+
+<section class="section">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Required time</th>
+                <th>form</th>
+                <th>color</th>
+                <th>bleeding</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for poo in poos %}
+            <tr>
+                <td>{{ poo.published_at }}</td>
+                <td>{{ poo.required_time }}</td>
+                <td>{{ poo.form }}</td>
+                <td>{{ poo.color }}</td>
+                <td>{{ poo.bleeding }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
 {% endblock content %}
