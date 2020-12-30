@@ -2,8 +2,7 @@
 
 ![Rust](https://github.com/yammmt/kusostat/workflows/Rust/badge.svg)
 
-Stores your excreation and urine info
-
+Stores your poo and pee info
 ## Develop
 
 ### CSS
