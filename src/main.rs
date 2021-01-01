@@ -2,18 +2,56 @@
 extern crate diesel;
 
 use actix_files as fs;
-use actix_web::{error, get, web, App, Error, HttpResponse, HttpServer, Result};
+use actix_web::{error, get, post, web, App, Error, HttpResponse, HttpServer, Result};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
 use dotenv::dotenv;
+use serde::{Deserialize, Serialize};
 use tera::Tera;
 
-use crate::db::poo::Poo;
+use crate::db::poo::*;
 
 mod db;
 mod schema;
 
 type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
+
+#[derive(Debug, Deserialize, Serialize)]
+struct PooInsertForm {
+    pub form: i32,
+    pub color: i32,
+    pub bleeding: i32,
+    pub required_time: String,
+    pub published_at: String,
+}
+
+impl From<actix_web::web::Form<PooInsertForm>> for db::poo::RawPoo {
+    // Uses dummy date/time if parse fails
+    fn from(params: actix_web::web::Form<PooInsertForm>) -> Self {
+        let default_rt = NaiveTime::from_hms(23, 59, 59);
+        let required_time = match params.required_time.len() {
+            5 => NaiveTime::parse_from_str(&params.required_time, "%H:%M").unwrap_or(default_rt),
+            8 => NaiveTime::parse_from_str(&params.required_time, "%H:%M:%S").unwrap_or(default_rt),
+            _ => default_rt,
+        };
+
+        let default_pa = NaiveDate::from_ymd(2099, 12, 31).and_hms(23, 59, 59);
+        let published_at = match params.published_at.len() {
+            16 => NaiveDateTime::parse_from_str(&params.published_at, "%Y-%m-%dT%H:%M")
+                .unwrap_or(default_pa),
+            _ => default_pa,
+        };
+
+        RawPoo {
+            form: params.form,
+            color: params.color,
+            bleeding: params.bleeding,
+            required_time,
+            published_at,
+        }
+    }
+}
 
 #[get("/")]
 async fn index(
@@ -30,6 +68,19 @@ async fn index(
         .render("index.html", &context)
         .map_err(|_| error::ErrorInternalServerError("Template error"))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(s))
+}
+
+#[post("/poo")]
+async fn insert_poo(
+    params: web::Form<PooInsertForm>,
+    pool: web::Data<DbPool>,
+) -> Result<HttpResponse, Error> {
+    let conn = pool.get().expect("Failed to get DB connection from pool");
+
+    Poo::insert(&conn, params.into());
+
+    // TODO: Redirect to index page
+    Ok(HttpResponse::Ok().content_type("text/html").body("added"))
 }
 
 #[actix_web::main]
@@ -49,6 +100,7 @@ async fn main() -> std::io::Result<()> {
             .data(pool.clone())
             .data(tera)
             .service(index)
+            .service(insert_poo)
             .service(
                 fs::Files::new("/css", concat!(env!("CARGO_MANIFEST_DIR"), "/static/css"))
                     .show_files_listing(),

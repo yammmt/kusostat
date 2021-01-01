@@ -6,7 +6,35 @@
 
 {% block content %}
 <section class="section">
-    Hello Work
+    <div class="container">
+        <form class="field is-grouped" action="/poo" method="post">
+            <p class="control is-expanded">
+                <label for="published_at">Published at</label>
+                <input class="input" type="datetime-local" name="published_at" id="published_at" value="2021-01-01T12:00" required>
+            </p>
+            <p class="control is-expanded">
+                <label for="required_time">Required time</label>
+                <input class="input" type="time" name="required_time" id="required_time" value="00:05:00" required>
+            </p>
+            <!-- TODO: Use name with dropdown list instead of internal number -->
+            <p class="control is-expanded">
+                <label for="form">Form</label>
+                <input class="input" type="number" name="form" id="form" value="2" required>
+            </p>
+            <p class="control is-expanded">
+                <label for="color">Color</label>
+                <input class="input" type="number" name="color" id="color" value="2" required>
+            </p>
+            <p class="control is-expanded">
+                <label for="bleeding">Bleeding</label>
+                <input class="input" type="number" name="bleeding" id="bleeding" value="2" required>
+            </p>
+            <!-- TODO: Align -->
+            <p class="control">
+                <button class="button is-info" type="submit">add</button>
+            </p>
+        </form>
+    </div>
 </section>
 
 <section class="section">

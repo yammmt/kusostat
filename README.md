@@ -33,3 +33,25 @@ And then run the following commands:
 diesel setup
 diesel migration run
 ```
+
+## Notes
+
+Here, I described some notes to use this app.
+
+### Input time info in form
+
+In short: use Google Chrome.
+
+This app supposes that the following strings are sent by form.
+
+| field name | string format |
+|:---|:---|
+| **Published at** | `2020-01-01T18:00` |
+| **Required time** | `00:10` (10min) |
+
+[MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input) says that some browsers support date picker for the above form inputs.
+And using its functions helps your work.
+
+For example, in my macOS v10.16.7, Chrome 87.0.4280.88 supports both fields,
+however, Firefox 84.0.1 doesn't support both of them and Safari 14.0 could send invalid data
+(for example, Safari allows us to fill in random string in **Published at** form).

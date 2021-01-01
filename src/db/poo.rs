@@ -1,11 +1,11 @@
 use chrono::{NaiveDateTime, NaiveTime};
 use diesel::{self, prelude::*};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::schema::poo::dsl::poo as all_poos;
 use crate::schema::*;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Queryable)]
+#[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize, Queryable)]
 pub struct Poo {
     id: i32,
     pub form: String,
@@ -13,6 +13,34 @@ pub struct Poo {
     pub bleeding: String,
     pub required_time: NaiveTime,
     pub published_at: NaiveDateTime,
+}
+
+#[table_name = "poo"]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, Insertable)]
+pub struct RawPoo {
+    pub form: i32,
+    pub color: i32,
+    pub bleeding: i32,
+    pub required_time: NaiveTime,
+    pub published_at: NaiveDateTime,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Queryable)]
+struct Form {
+    id: i32,
+    name: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Queryable)]
+struct Color {
+    id: i32,
+    name: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Queryable)]
+struct Bleeding {
+    id: i32,
+    name: String,
 }
 
 impl Poo {
@@ -32,5 +60,12 @@ impl Poo {
             ))
             .load(conn)
             .expect("Failed to read data from DB")
+    }
+
+    pub fn insert(conn: &PgConnection, form: RawPoo) -> bool {
+        diesel::insert_into(poo::table)
+            .values(form)
+            .execute(conn)
+            .is_ok()
     }
 }
