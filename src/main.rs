@@ -11,6 +11,9 @@ use serde::{Deserialize, Serialize};
 use tera::Tera;
 
 use crate::db::poo::*;
+use crate::db::poo_bleeding::*;
+use crate::db::poo_color::*;
+use crate::db::poo_form::*;
 
 mod db;
 mod schema;
@@ -60,9 +63,15 @@ async fn index(
 ) -> Result<HttpResponse, Error> {
     let conn = pool.get().expect("Failed to get DB connection from pool");
     let poos = Poo::all(&conn);
+    let poo_forms = PooForm::all(&conn);
+    let poo_colors = PooColor::all(&conn);
+    let poo_bleedings = PooBleeding::all(&conn);
 
     let mut context = tera::Context::new();
     context.insert("poos", &poos);
+    context.insert("poo_forms", &poo_forms);
+    context.insert("poo_colors", &poo_colors);
+    context.insert("poo_bleedings", &poo_bleedings);
 
     let s = tmpl
         .render("index.html", &context)

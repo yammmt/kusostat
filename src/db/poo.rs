@@ -25,24 +25,6 @@ pub struct RawPoo {
     pub published_at: NaiveDateTime,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Queryable)]
-struct Form {
-    id: i32,
-    name: String,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Queryable)]
-struct Color {
-    id: i32,
-    name: String,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Queryable)]
-struct Bleeding {
-    id: i32,
-    name: String,
-}
-
 impl Poo {
     pub fn all(conn: &PgConnection) -> Vec<Poo> {
         all_poos

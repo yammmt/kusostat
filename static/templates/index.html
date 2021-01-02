@@ -8,31 +8,60 @@
 <section class="section">
     <div class="container">
         <form class="field is-grouped" action="/poo" method="post">
-            <p class="control is-expanded">
+            <div class="control is-expanded">
                 <label for="published_at">Published at</label>
                 <input class="input" type="datetime-local" name="published_at" id="published_at" value="2021-01-01T12:00" required>
-            </p>
-            <p class="control is-expanded">
+            </div>
+            <div class="control is-expanded">
                 <label for="required_time">Required time</label>
                 <input class="input" type="time" name="required_time" id="required_time" value="00:05:00" required>
-            </p>
-            <!-- TODO: Use name with dropdown list instead of internal number -->
-            <p class="control is-expanded">
-                <label for="form">Form</label>
-                <input class="input" type="number" name="form" id="form" value="2" required>
-            </p>
-            <p class="control is-expanded">
-                <label for="color">Color</label>
-                <input class="input" type="number" name="color" id="color" value="2" required>
-            </p>
-            <p class="control is-expanded">
-                <label for="bleeding">Bleeding</label>
-                <input class="input" type="number" name="bleeding" id="bleeding" value="2" required>
-            </p>
+            </div>
+            <div class="control">
+                <div class="field">
+                    <label for="form">Form</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="form">
+                                {% for form in poo_forms %}
+                                <option value="{{ form.id }}">{{ form.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="control">
+                <div class="field">
+                    <label for="color">Color</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="color">
+                                {% for color in poo_colors %}
+                                <option value="{{ color.id }}">{{ color.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="control">
+                <div class="field">
+                    <label for="bleeding">Bleeding</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="bleeding">
+                                {% for bleeding in poo_bleedings %}
+                                <option value="{{ bleeding.id }}">{{ bleeding.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- TODO: Align -->
-            <p class="control">
+            <div class="control">
                 <button class="button is-info" type="submit">add</button>
-            </p>
+            </div>
         </form>
     </div>
 </section>
