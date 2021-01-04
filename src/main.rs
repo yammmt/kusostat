@@ -2,12 +2,14 @@
 extern crate diesel;
 
 use actix_files as fs;
-use actix_web::{App, Error, HttpResponse, HttpServer, Result, error, get, http, post, web};
+use actix_session::{CookieSession, Session};
+use actix_web::{error, get, http, post, web, App, Error, HttpResponse, HttpServer, Result};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
 use dotenv::dotenv;
 use serde::{Deserialize, Serialize};
+use session::FlashMessage;
 use tera::Tera;
 
 use crate::db::poo::*;
@@ -17,6 +19,9 @@ use crate::db::poo_form::*;
 
 mod db;
 mod schema;
+mod session;
+
+static SESSION_SIGNING_KEY: &[u8] = &[0; 32];
 
 type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
@@ -60,6 +65,7 @@ impl From<actix_web::web::Form<PooInsertForm>> for db::poo::RawPoo {
 async fn index(
     tmpl: web::Data<tera::Tera>,
     pool: web::Data<DbPool>,
+    session: Session,
 ) -> Result<HttpResponse, Error> {
     let conn = pool.get().expect("Failed to get DB connection from pool");
     let poos = Poo::all(&conn);
@@ -73,6 +79,11 @@ async fn index(
     context.insert("poo_colors", &poo_colors);
     context.insert("poo_bleedings", &poo_bleedings);
 
+    if let Some(flash) = session::get_flash(&session)? {
+        context.insert("msg", &(flash.kind, flash.message));
+        session::clear_flash(&session);
+    }
+
     let s = tmpl
         .render("index.html", &context)
         .map_err(|_| error::ErrorInternalServerError("Template error"))?;
@@ -83,12 +94,19 @@ async fn index(
 async fn insert_poo(
     params: web::Form<PooInsertForm>,
     pool: web::Data<DbPool>,
+    session: Session,
 ) -> Result<HttpResponse, Error> {
     let conn = pool.get().expect("Failed to get DB connection from pool");
 
-    Poo::insert(&conn, params.into());
+    session::set_flash(
+        &session,
+        if Poo::insert(&conn, params.into()) {
+            FlashMessage::success("New poo data was added")
+        } else {
+            FlashMessage::error("Failed to add new poo data")
+        },
+    )?;
 
-    // TODO: Show flush message
     Ok(redirect_to("/"))
 }
 
@@ -104,10 +122,12 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         // No `unwrap()` error because there is the `static/` directory
         let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/static/templates/*")).unwrap();
+        let session_store = CookieSession::signed(SESSION_SIGNING_KEY).secure(false);
 
         App::new()
             .data(pool.clone())
             .data(tera)
+            .wrap(session_store)
             .service(index)
             .service(insert_poo)
             .service(
