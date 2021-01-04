@@ -2,7 +2,7 @@
 extern crate diesel;
 
 use actix_files as fs;
-use actix_web::{error, get, post, web, App, Error, HttpResponse, HttpServer, Result};
+use actix_web::{App, Error, HttpResponse, HttpServer, Result, error, get, http, post, web};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
@@ -88,8 +88,8 @@ async fn insert_poo(
 
     Poo::insert(&conn, params.into());
 
-    // TODO: Redirect to index page
-    Ok(HttpResponse::Ok().content_type("text/html").body("added"))
+    // TODO: Show flush message
+    Ok(redirect_to("/"))
 }
 
 #[actix_web::main]
@@ -118,4 +118,10 @@ async fn main() -> std::io::Result<()> {
     .bind("127.0.0.1:8080")?
     .run()
     .await
+}
+
+fn redirect_to(location: &str) -> HttpResponse {
+    HttpResponse::Found()
+        .header(http::header::LOCATION, location)
+        .finish()
 }
