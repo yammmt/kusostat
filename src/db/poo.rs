@@ -50,4 +50,9 @@ impl Poo {
             .execute(conn)
             .is_ok()
     }
+
+    #[cfg(test)]
+    pub fn delete_all(conn: &PgConnection) -> bool {
+        diesel::delete(all_poos).execute(conn).is_ok()
+    }
 }

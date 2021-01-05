@@ -24,7 +24,7 @@ First, make sure that your PostgreSQL works without errors.
 Then write your database info to `.env` file, for example,
 
 ```text
-DATABASE_URL=postgres://postgres:password@localhost/kusostat
+DATABASE_URL=postgres://postgres:password@localhost/
 ```
 
 And then run the following commands:
@@ -32,6 +32,17 @@ And then run the following commands:
 ```console
 diesel setup
 diesel migration run
+```
+
+Your poo data is saved into `kusostat` database.
+
+### Test
+
+Before running tests, you have to run DB migration.
+
+```console
+# example URL
+diesel setup --database-url "postgres://postgres:password@localhost/kusostat_test"
 ```
 
 ## Notes

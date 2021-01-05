@@ -20,6 +20,8 @@ use crate::db::poo_form::*;
 mod db;
 mod schema;
 mod session;
+#[cfg(test)]
+mod tests;
 
 static SESSION_SIGNING_KEY: &[u8] = &[0; 32];
 
@@ -112,19 +114,30 @@ async fn insert_poo(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    HttpServer::new(move || App::new().configure(app_config))
+        .bind("127.0.0.1:8080")?
+        .run()
+        .await
+}
+
+fn app_config(config: &mut web::ServiceConfig) {
     dotenv().expect("Failed to read `.env` file");
-    let connspec = std::env::var("DATABASE_URL").expect("env `DATABASE_URL` is empty");
+    let mut connspec = std::env::var("DATABASE_URL").expect("env `DATABASE_URL` is empty");
+    connspec.push_str(if cfg!(test) {
+        "kusostat_test"
+    } else {
+        "kusostat"
+    });
     let manager = ConnectionManager::<PgConnection>::new(connspec);
     let pool = r2d2::Pool::builder()
         .build(manager)
         .expect("Failed to create pool");
+    // No `unwrap()` error because there is the `static/` directory
+    let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/static/templates/*")).unwrap();
+    let session_store = CookieSession::signed(SESSION_SIGNING_KEY).secure(false);
 
-    HttpServer::new(move || {
-        // No `unwrap()` error because there is the `static/` directory
-        let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/static/templates/*")).unwrap();
-        let session_store = CookieSession::signed(SESSION_SIGNING_KEY).secure(false);
-
-        App::new()
+    config.service(
+        web::scope("")
             .data(pool.clone())
             .data(tera)
             .wrap(session_store)
@@ -133,11 +146,8 @@ async fn main() -> std::io::Result<()> {
             .service(
                 fs::Files::new("/css", concat!(env!("CARGO_MANIFEST_DIR"), "/static/css"))
                     .show_files_listing(),
-            )
-    })
-    .bind("127.0.0.1:8080")?
-    .run()
-    .await
+            ),
+    );
 }
 
 fn redirect_to(location: &str) -> HttpResponse {
