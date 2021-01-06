@@ -17,6 +17,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install postgres (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpq-dev postgresql
+        echo "host    all             all             127.0.0.1/32            md5" > sudo tee -a /etc/postgresql/10/main/pg_hba.conf
+        sudo service postgresql restart && sleep 3
+        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'root';"
+        sudo service postgresql restart && sleep 3
     - name: Install postgres (Windows)
       if: runner.os == 'Windows'
       shell: bash
@@ -25,13 +34,23 @@ jobs:
         echo "C:\Program Files\PostgreSQL\13\bin" >> $GITHUB_PATH
         echo "C:\Program Files\PostgreSQL\13\lib" >> $GITHUB_PATH
         echo "PQ_LIB_DIR=C:\Program Files\PostgreSQL\13\lib" >> $GITHUB_ENV
+    - name: Install postgres (MacOS)
+      if: runner.os == 'macOS'
+      run: |
+        /usr/local/opt/postgres/bin/pg_ctl -D /usr/local/var/postgres start
+        sleep 3
+        /usr/local/opt/postgres/bin/createuser -s postgres
     - name: Build
       run: |
-        echo "DATABASE_URL=postgres://postgres:root@localhost/kusostat" >> $GITHUB_ENV
+        cargo install diesel_cli --no-default-features --features "postgres"
+        diesel setup --database-url "postgres://postgres:root@localhost/kusostat"
+        echo "DATABASE_URL=postgres://postgres:root@localhost/" > .env
         cargo build --verbose
     - name: Run tests
       run: |
-        echo "DATABASE_URL=postgres://postgres:root@localhost/kusostat_test" >> $GITHUB_ENV
+        cargo install diesel_cli --no-default-features --features "postgres"
+        diesel setup --database-url "postgres://postgres:root@localhost/kusostat_test"
+        echo "DATABASE_URL=postgres://postgres:root@localhost/" > .env
         cargo test --verbose
 
   clippy:
