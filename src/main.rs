@@ -138,7 +138,7 @@ fn app_config(config: &mut web::ServiceConfig) {
 
     config.service(
         web::scope("")
-            .data(pool.clone())
+            .data(pool)
             .data(tera)
             .wrap(session_store)
             .service(index)
