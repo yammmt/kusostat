@@ -1,5 +1,4 @@
-use diesel::{self, prelude::*};
-use serde::{Deserialize, Serialize};
+use super::*;
 
 use crate::schema::poo_bleeding;
 use crate::schema::poo_bleeding::dsl::poo_bleeding as all_poo_bleedings;

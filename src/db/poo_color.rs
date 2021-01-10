@@ -1,5 +1,4 @@
-use diesel::{self, prelude::*};
-use serde::{Deserialize, Serialize};
+use super::*;
 
 use crate::schema::poo_color;
 use crate::schema::poo_color::dsl::poo_color as all_poo_colors;

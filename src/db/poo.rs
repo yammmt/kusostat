@@ -1,9 +1,9 @@
+use super::*;
+
 use chrono::{NaiveDateTime, NaiveTime};
-use diesel::{self, prelude::*};
-use serde::{Deserialize, Serialize};
 
 use crate::schema::poo::dsl::poo as all_poos;
-use crate::schema::*;
+use crate::schema::{poo, poo_bleeding, poo_color, poo_form};
 
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize, Queryable)]
 pub struct Poo {
