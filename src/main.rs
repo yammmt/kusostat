@@ -3,11 +3,13 @@ extern crate diesel;
 
 use actix_files as fs;
 use actix_session::{CookieSession, Session};
+use actix_web::middleware::Logger;
 use actix_web::{error, get, http, post, web, App, Error, HttpResponse, HttpServer, Result};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
 use dotenv::dotenv;
+use log::info;
 use serde::{Deserialize, Serialize};
 use session::FlashMessage;
 use tera::Tera;
@@ -100,6 +102,7 @@ async fn insert_poo(
 ) -> Result<HttpResponse, Error> {
     let conn = pool.get().expect("Failed to get DB connection from pool");
 
+    info!("{:?}", params);
     session::set_flash(
         &session,
         if Poo::insert(&conn, params.into()) {
@@ -114,7 +117,9 @@ async fn insert_poo(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(move || App::new().configure(app_config))
+    env_logger::init();
+
+    HttpServer::new(move || App::new().configure(app_config).wrap(Logger::default()))
         .bind("127.0.0.1:8080")?
         .run()
         .await

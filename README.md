@@ -45,6 +45,14 @@ Before running tests, you have to run DB migration.
 diesel setup --database-url "postgres://postgres:password@localhost/kusostat_test"
 ```
 
+### Log
+
+You can see the app log if you set the environment variable.
+
+```console
+RUST_LOG=info cargo r
+```
+
 ## Notes
 
 Here, I described some notes to use this app.
