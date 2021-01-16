@@ -85,6 +85,7 @@
                 <th>form</th>
                 <th>color</th>
                 <th>bleeding</th>
+                <th>Delete</th>
             </tr>
         </thead>
 
@@ -96,6 +97,11 @@
                 <td>{{ poo.form }}</td>
                 <td>{{ poo.color }}</td>
                 <td>{{ poo.bleeding }}</td>
+                <td>
+                    <form class="inline" action="/poo/{{ poo.id }}" method="post">
+                        <button class="button is-danger is-small" type="submit">Delete</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

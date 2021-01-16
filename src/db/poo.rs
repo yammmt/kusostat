@@ -7,7 +7,7 @@ use crate::schema::{poo, poo_bleeding, poo_color, poo_form};
 
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize, Queryable)]
 pub struct Poo {
-    id: i32,
+    pub id: i32,
     pub form: String,
     pub color: String,
     pub bleeding: String,
@@ -49,6 +49,10 @@ impl Poo {
             .values(form)
             .execute(conn)
             .is_ok()
+    }
+
+    pub fn delete_with_id(conn: &PgConnection, id: i32) -> bool {
+        diesel::delete(all_poos.find(id)).execute(conn).is_ok()
     }
 
     #[cfg(test)]

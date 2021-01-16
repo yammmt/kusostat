@@ -115,6 +115,31 @@ async fn insert_poo(
     Ok(redirect_to("/"))
 }
 
+// Use `post` method instead of `delete` one because
+// - Dealing with `delete` method requires manual implement
+// - There are no plans to support the other requests
+#[post("/poo/{pooid}")]
+async fn delete_poo(
+    web::Path(pooid): web::Path<i32>,
+    pool: web::Data<DbPool>,
+    session: Session,
+) -> Result<HttpResponse, Error> {
+    let conn = pool.get().expect("Failed to get DB connection from pool");
+
+    info!("delete ID {}", pooid);
+    // TODO: Even if no record is deleted, `delete_with_id` returns `true`
+    session::set_flash(
+        &session,
+        if Poo::delete_with_id(&conn, pooid) {
+            FlashMessage::success("Your poo data was deleted")
+        } else {
+            FlashMessage::error("Failed to delete you poo data")
+        },
+    )?;
+
+    Ok(redirect_to("/"))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
@@ -148,6 +173,7 @@ fn app_config(config: &mut web::ServiceConfig) {
             .wrap(session_store)
             .service(index)
             .service(insert_poo)
+            .service(delete_poo)
             .service(
                 fs::Files::new("/css", concat!(env!("CARGO_MANIFEST_DIR"), "/static/css"))
                     .show_files_listing(),

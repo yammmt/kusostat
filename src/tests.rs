@@ -126,6 +126,82 @@ async fn insert_poo_with_invalid_bleeding() {
     .await;
 }
 
+#[actix_rt::test]
+async fn delete_poo_works() {
+    run_db_test!(|conn| {
+        let mut app = test::init_service(App::new().configure(app_config)).await;
+
+        // Post poo form
+        let mut rng = thread_rng();
+        let params = PooInsertForm {
+            form: rng.gen_range(1..6),
+            color: rng.gen_range(1..6),
+            bleeding: rng.gen_range(1..4),
+            required_time: "00:10".to_string(),
+            published_at: "2021-04-01T13:34".to_string(),
+        };
+        let req = test::TestRequest::post()
+            .uri("/poo")
+            .set_form(&params)
+            .to_request();
+        let res = test::call_service(&mut app, req).await;
+        assert!(res.status().is_redirection());
+        let poos_before = Poo::all(&conn);
+
+        // Post to delete inserted poo
+        let req = test::TestRequest::post()
+            .uri(&format!("/poo/{}", poos_before[0].id))
+            .to_request();
+        let res = test::call_service(&mut app, req).await;
+        assert!(res.status().is_redirection());
+        // See flash message
+        assert!(res
+            .headers()
+            .get("set-cookie")
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .contains("deleted"));
+        // See the number of records
+        let poos_after = Poo::all(&conn);
+        assert_eq!(poos_after.len(), poos_before.len() - 1);
+    });
+}
+
+#[actix_rt::test]
+async fn delete_poo_with_invalid_id() {
+    run_db_test!(|conn| {
+        let mut app = test::init_service(App::new().configure(app_config)).await;
+
+        // Post poo form
+        let mut rng = thread_rng();
+        let params = PooInsertForm {
+            form: rng.gen_range(1..6),
+            color: rng.gen_range(1..6),
+            bleeding: rng.gen_range(1..4),
+            required_time: "00:10".to_string(),
+            published_at: "2021-04-01T13:34".to_string(),
+        };
+        let req = test::TestRequest::post()
+            .uri("/poo")
+            .set_form(&params)
+            .to_request();
+        let res = test::call_service(&mut app, req).await;
+        assert!(res.status().is_redirection());
+        let poos_before = Poo::all(&conn);
+
+        // Post to delete inserted poo with invalid ID
+        let req = test::TestRequest::post()
+            .uri(&format!("/poo/{}", poos_before[0].id + 1))
+            .to_request();
+        let res = test::call_service(&mut app, req).await;
+        assert!(res.status().is_redirection());
+
+        let poos_after = Poo::all(&conn);
+        assert_eq!(poos_after.len(), poos_before.len());
+    });
+}
+
 // TODO: creating DB pool by each test seems to be slow
 fn create_db_conn() -> PooledConnection<ConnectionManager<PgConnection>> {
     dotenv().expect("Failed to read `.env` file");
