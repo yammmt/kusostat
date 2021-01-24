@@ -30,8 +30,8 @@ DATABASE_URL=postgres://postgres:password@localhost/
 And then run the following commands:
 
 ```console
-diesel setup
-diesel migration run
+diesel setup --database-url postgres://postgres:password@localhost/kusostat
+diesel migration run --database-url postgres://postgres:password@localhost/kusostat
 ```
 
 Your poo data is saved into `kusostat` database.
