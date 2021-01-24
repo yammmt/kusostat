@@ -36,6 +36,26 @@ diesel migration run
 
 Your poo data is saved into `kusostat` database.
 
+#### Running with Docker
+
+The process is almost the same as the previous description.
+
+:warning: Note that you must update the following username and password to your ones.
+
+```console
+export DATABASE_URL==postgres://postgres:password@localhost/kusostat
+docker-compose up -d
+diesel setup
+diesel migration run
+cargo run # --release
+```
+
+If you want to use PostgreSQL in your terminal, run the following command:
+
+```console
+docker-compose exec postgresql psql -U postgres log-collector
+```
+
 ### Test
 
 Before running tests, you have to run DB migration.
