@@ -145,19 +145,17 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     HttpServer::new(move || App::new().configure(app_config).wrap(Logger::default()))
-        .bind("127.0.0.1:8080")?
+        .bind("0.0.0.0:8080")?
         .run()
         .await
 }
 
 fn app_config(config: &mut web::ServiceConfig) {
-    dotenv().expect("Failed to read `.env` file");
+    dotenv().ok();
     let mut connspec = std::env::var("DATABASE_URL").expect("env `DATABASE_URL` is empty");
-    connspec.push_str(if cfg!(test) {
-        "kusostat_test"
-    } else {
-        "kusostat"
-    });
+    if cfg!(test) {
+        connspec.push_str("_test");
+    }
     let manager = ConnectionManager::<PgConnection>::new(connspec);
     let pool = r2d2::Pool::builder()
         .build(manager)

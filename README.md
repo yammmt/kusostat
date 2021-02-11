@@ -3,7 +3,52 @@
 ![Rust](https://github.com/yammmt/kusostat/workflows/Rust/badge.svg)
 
 Stores your poo and pee info
+
+## Run
+
+You can run this app with local or using Docker.
+
+### Run with local
+
+First, make sure that your PostgreSQL works without errors.
+
+Then write your database info to `.env` file, for example,
+
+```text
+DATABASE_URL=postgres://postgres:password@localhost/kusostat
+```
+
+And then run the following commands:
+
+```console
+diesel setup --database-url postgres://postgres:password@localhost/kusostat
+diesel migration run --database-url postgres://postgres:password@localhost/kusostat
+```
+
+Your poo data is saved into `kusostat` database.
+
+### Run with Docker
+
+Here, there are no needs for `.env` file.
+What you have to do is, to run `docker-compose` command.
+
+```console
+docker-compose up -d
+```
+
+If you want to use PostgreSQL in your terminal, run the following command:
+
+```console
+docker-compose exec postgresql psql -U postgres db
+# or
+psql -U postgres -h localhost
+```
+
+For Docker image's information, see `docker-compose.yml` file.
+
 ## Develop
+
+Here I write some tips to develop this.
 
 ### CSS
 
@@ -16,45 +61,6 @@ sass --sourcemap=none mystyles.scss:../static/css/mystyles.css --style compresse
 ```
 
 For Sass detail, please see [Bulma documents](https://bulma.io/documentation/customize/with-sass-cli/).
-
-### Database (PostgreSQL)
-
-First, make sure that your PostgreSQL works without errors.
-
-Then write your database info to `.env` file, for example,
-
-```text
-DATABASE_URL=postgres://postgres:password@localhost/
-```
-
-And then run the following commands:
-
-```console
-diesel setup --database-url postgres://postgres:password@localhost/kusostat
-diesel migration run --database-url postgres://postgres:password@localhost/kusostat
-```
-
-Your poo data is saved into `kusostat` database.
-
-#### Running with Docker
-
-The process is almost the same as the previous description.
-
-:warning: Note that you must update the following username and password to your ones.
-
-```console
-export DATABASE_URL==postgres://postgres:password@localhost/kusostat
-docker-compose up -d
-diesel setup
-diesel migration run
-cargo run # --release
-```
-
-If you want to use PostgreSQL in your terminal, run the following command:
-
-```console
-docker-compose exec postgresql psql -U postgres log-collector
-```
 
 ### Test
 

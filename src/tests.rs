@@ -204,9 +204,9 @@ async fn delete_poo_with_invalid_id() {
 
 // TODO: creating DB pool by each test seems to be slow
 fn create_db_conn() -> PooledConnection<ConnectionManager<PgConnection>> {
-    dotenv().expect("Failed to read `.env` file");
+    dotenv().ok();
     let mut connspec = std::env::var("DATABASE_URL").expect("env `DATABASE_URL` is empty");
-    connspec.push_str("kusostat_test");
+    connspec.push_str("_test");
     let manager = ConnectionManager::<PgConnection>::new(connspec);
     let pool = r2d2::Pool::builder()
         .build(manager)

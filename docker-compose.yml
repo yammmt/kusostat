@@ -1,7 +1,33 @@
-postgresql:
-  image: postgres
-  environment:
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: password
-  ports:
-    - "5432:5432"
+version: "3"
+
+services:
+  db-data:
+    image: busybox
+    volumes:
+      - /var/lib/postgresql/data
+
+  db:
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    image: postgres
+    ports:
+      - 5432:5432
+    volumes_from:
+      - db-data
+    restart: always
+
+  web:
+    build: .
+    command: bash -c "
+      ./wait-for-it.sh db:5432 -- diesel setup
+      && diesel migration run
+      && cargo run --release"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db/kusostat
+    links:
+      - db
+    ports:
+      - 8080:8080
