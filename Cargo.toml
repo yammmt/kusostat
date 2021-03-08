@@ -15,7 +15,7 @@ env_logger = "0.8.3"
 log = "0.4.14"
 r2d2 = "0.8.9"
 serde = "1.0.124"
-tera = "1.6.1"
+tera = "1.7.0"
 
 [dev-dependencies]
 actix-rt = "2.1.0"
